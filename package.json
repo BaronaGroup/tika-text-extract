@@ -1,6 +1,6 @@
 {
-  "name": "@shelf/tika-text-extract",
-  "version": "2.5.1",
+  "name": "@barona/forked-shelf-tika-text-extract",
+  "version": "2.6.0",
   "description": "Extract text from documents with Apache Tika",
   "repository": "shelfio/tika-text-extract",
   "license": "MIT",
