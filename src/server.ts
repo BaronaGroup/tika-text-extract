@@ -9,9 +9,16 @@ const debug = require('debug')('tika-text-extract');
  * @param options Customize text extraction
  * @return Resolves when server is started
  */
+
+let child: ReturnType<typeof exec> | null = null;
+
 export function startServer(artifactPath: string, options?: TextExtractionConfig): Promise<void> {
   if (!artifactPath) {
     throw new Error('Please provide path to Tika Server Artifact');
+  }
+
+  if (child) {
+    throw new Error('Server already started');
   }
 
   const startCommand = `${getExecutableJavaPath(options)} ${getOptionsBasedOnJavaVersion(
@@ -19,7 +26,8 @@ export function startServer(artifactPath: string, options?: TextExtractionConfig
   )} -Duser.home=/tmp -jar ${artifactPath}`;
 
   return new Promise((resolve, reject) => {
-    exec(startCommand).stderr.on('data', data => {
+    child = exec(startCommand);
+    child.stderr.on('data', data => {
       debug(data);
 
       const isTika1_14Started: boolean = data.indexOf('INFO: Started') > -1;
@@ -34,6 +42,10 @@ export function startServer(artifactPath: string, options?: TextExtractionConfig
       if (isError) {
         reject(new Error(data));
       }
+    });
+
+    child.on('exit', () => {
+      child = null;
     });
   });
 }
@@ -52,4 +64,14 @@ function getOptionsBasedOnJavaVersion(options: TextExtractionConfig): string {
   }
 
   return '--add-modules=java.xml.bind,java.activation';
+}
+
+export async function stopServer() {
+  if (!child) {
+    throw new Error('Server not running');
+  }
+  child.kill();
+  while (child) {
+    await new Promise(resolve => setTimeout(resolve, 50));
+  }
 }
