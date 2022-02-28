@@ -1,5 +1,6 @@
 import {exec} from 'child_process';
 import {TextExtractionConfig} from './server.types';
+import {getPort, port, setPort} from './config';
 
 const debug = require('debug')('tika-text-extract');
 
@@ -21,9 +22,11 @@ export function startServer(artifactPath: string, options?: TextExtractionConfig
     throw new Error('Server already started');
   }
 
+  if (options.port) setPort(options.port);
+
   const startCommand = `${getExecutableJavaPath(options)} ${getOptionsBasedOnJavaVersion(
     options
-  )} -Duser.home=/tmp -jar ${artifactPath}`;
+  )} -Duser.home=/tmp -jar ${artifactPath} --port ${getPort()}`;
 
   return new Promise((resolve, reject) => {
     child = exec(startCommand);
