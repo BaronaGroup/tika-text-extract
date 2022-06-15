@@ -6,11 +6,13 @@
   "license": "MIT",
   "author": "Vlad Holubiev",
   "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "files": [
     "lib/"
   ],
   "scripts": {
-    "build": "rm -rf lib/ && babel src --out-dir lib --ignore 'src/*.test.ts','src/*.types.ts'  --extensions '.ts'",
+    "build": "rm -rf lib/ && npm run build-types && babel src --out-dir lib --ignore 'src/*.test.ts','src/*.types.ts'  --extensions '.ts'",
+    "build-types": "npx tsc --project tsconfig.json  --declaration --outDir lib || echo 'Type issues are ignored'",
     "coverage": "jest --coverage",
     "lint": "eslint . --ext .js,.ts,.json --fix",
     "prepublish": "npm run build",
