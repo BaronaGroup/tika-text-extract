@@ -13,7 +13,10 @@ const debug = require('debug')('tika-text-extract');
 
 let child: ReturnType<typeof exec> | null = null;
 
-export function startServer(artifactPath: string, options?: TextExtractionConfig): Promise<void> {
+export function startServer(
+  artifactPath: string,
+  options?: TextExtractionConfig
+): Promise<{pid: number}> {
   if (!artifactPath) {
     throw new Error('Please provide path to Tika Server Artifact');
   }
@@ -39,7 +42,7 @@ export function startServer(artifactPath: string, options?: TextExtractionConfig
       const isError: boolean = data.match(/java.*Exception|error/i);
 
       if (isStarted) {
-        resolve();
+        resolve({pid: child.pid});
       }
 
       if (isError) {
